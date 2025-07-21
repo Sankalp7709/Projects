@@ -1,0 +1,116 @@
+import mysql.connector
+
+# Connect to MySQL
+conn = mysql.connector.connect(
+    host="localhost",
+    user="root",       # replace with your username
+    password="",       # replace with your password
+    database="employee_db"
+)
+cursor = conn.cursor()
+
+def add_employee():
+    name = input("Enter Name: ")
+    email = input("Enter Email: ")
+    phone = input("Enter Phone: ")
+    address = input("Enter Address: ")
+    post = input("Enter Post: ")
+    salary = float(input("Enter Salary: "))
+
+    query = "INSERT INTO employees (name, email, phone, address, post, salary) VALUES (%s, %s, %s, %s, %s, %s)"
+    values = (name, email, phone, address, post, salary)
+    cursor.execute(query, values)
+    conn.commit()
+    print("✅ Employee added successfully.")
+
+def display_employees():
+    cursor.execute("SELECT * FROM employees")
+    rows = cursor.fetchall()
+    print("\n📋 Employee Records:")
+    print("ID | Name | Email | Phone | Address | Post | Salary")
+    print("-" * 70)
+    for row in rows:
+        print(f"{row[0]} | {row[1]} | {row[2]} | {row[3]} | {row[4]} | {row[5]} | ₹{row[6]}")
+    print("-" * 70)
+
+def update_employee():
+    emp_id = input("Enter Employee ID to update: ")
+    print("What do you want to update?")
+    print("1. Email\n2. Phone\n3. Address")
+    choice = input("Choose option (1-3): ")
+
+    if choice == '1':
+        new_email = input("Enter new Email: ")
+        cursor.execute("UPDATE employees SET email = %s WHERE id = %s", (new_email, emp_id))
+    elif choice == '2':
+        new_phone = input("Enter new Phone: ")
+        cursor.execute("UPDATE employees SET phone = %s WHERE id = %s", (new_phone, emp_id))
+    elif choice == '3':
+        new_address = input("Enter new Address: ")
+        cursor.execute("UPDATE employees SET address = %s WHERE id = %s", (new_address, emp_id))
+    else:
+        print("❌ Invalid option")
+        return
+
+    conn.commit()
+    print("✅ Employee information updated.")
+
+def promote_employee():
+    emp_id = input("Enter Employee ID to promote: ")
+    increase = float(input("Enter amount to increase salary: ₹"))
+    cursor.execute("UPDATE employees SET salary = salary + %s WHERE id = %s", (increase, emp_id))
+    conn.commit()
+    print("✅ Employee promoted successfully.")
+
+def remove_employee():
+    emp_id = input("Enter Employee ID to remove: ")
+    cursor.execute("DELETE FROM employees WHERE id = %s", (emp_id,))
+    conn.commit()
+    print("🗑️ Employee record deleted.")
+
+def search_employee():
+    emp_id = input("Enter Employee ID to search: ")
+    cursor.execute("SELECT * FROM employees WHERE id = %s", (emp_id,))
+    row = cursor.fetchone()
+    if row:
+        print("\n🔍 Employee Found:")
+        print(f"ID: {row[0]}\nName: {row[1]}\nEmail: {row[2]}\nPhone: {row[3]}\nAddress: {row[4]}\nPost: {row[5]}\nSalary: ₹{row[6]}")
+    else:
+        print("❌ Employee not found.")
+
+def menu():
+    while True:
+        print("\n====== Employee Management System ======")
+        print("1. Add Employee")
+        print("2. Display All Employees")
+        print("3. Update Employee Info")
+        print("4. Promote Employee")
+        print("5. Remove Employee")
+        print("6. Search Employee")
+        print("7. Exit")
+        choice = input("Select an option (1-7): ")
+
+        if choice == '1':
+            add_employee()
+        elif choice == '2':
+            display_employees()
+        elif choice == '3':
+            update_employee()
+        elif choice == '4':
+            promote_employee()
+        elif choice == '5':
+            remove_employee()
+        elif choice == '6':
+            search_employee()
+        elif choice == '7':
+            print("👋 Exiting... Goodbye!")
+            break
+        else:
+            print("❌ Invalid choice. Try again.")
+
+# Start the program
+menu()
+
+# Close connection
+cursor.close()
+conn.close()
